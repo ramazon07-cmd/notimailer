@@ -1,0 +1,8 @@
+Django>=4.2
+gunicorn
+psycopg2-binary
+celery
+redis
+django-environ
+drf-yasg
+whitenoise
