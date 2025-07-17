@@ -1,0 +1,605 @@
+{
+	"info": {
+		"_postman_id": "8a6b8c9d-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+		"name": "Notimailer API",
+		"description": "API collection for Notimailer - Personal Email Reminder Service powered by Django + Celery",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"password\": \"strong_password123\",\n    \"password2\": \"strong_password123\",\n    \"profile\": {\n        \"birthdate\": \"1990-01-01\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
+							]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"strong_password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Login and get JWT tokens"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh",
+								""
+							]
+						},
+						"description": "Refresh the JWT access token"
+					},
+					"response": []
+				},
+				{
+					"name": "User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"profile",
+								""
+							]
+						},
+						"description": "Get current user profile"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration and login"
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								""
+							]
+						},
+						"description": "Get dashboard data including reminder counts and upcoming reminders"
+					},
+					"response": []
+				}
+			],
+			"description": "Dashboard API for viewing user statistics"
+		},
+		{
+			"name": "Reminders",
+			"item": [
+				{
+					"name": "List Reminders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								""
+							]
+						},
+						"description": "Get a list of all user reminders"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Reminder",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Meeting Reminder\",\n    \"message\": \"Don't forget about the team meeting tomorrow!\",\n    \"scheduled_time\": \"2023-12-15T14:30:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reminders/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								""
+							]
+						},
+						"description": "Create a new reminder"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reminder",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"1",
+								""
+							]
+						},
+						"description": "Get a specific reminder by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Reminder",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Meeting Reminder\",\n    \"message\": \"Meeting has been rescheduled!\",\n    \"scheduled_time\": \"2023-12-16T15:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"1",
+								""
+							]
+						},
+						"description": "Update an existing reminder"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Reminder",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"1",
+								""
+							]
+						},
+						"description": "Delete a reminder"
+					},
+					"response": []
+				},
+				{
+					"name": "Upcoming Reminders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/upcoming/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"upcoming",
+								""
+							]
+						},
+						"description": "Get list of upcoming reminders"
+					},
+					"response": []
+				},
+				{
+					"name": "Sent Reminders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/sent/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"sent",
+								""
+							]
+						},
+						"description": "Get list of sent reminders"
+					},
+					"response": []
+				},
+				{
+					"name": "Failed Reminders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reminders/failed/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reminders",
+								"failed",
+								""
+							]
+						},
+						"description": "Get list of failed reminders"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for reminders"
+		},
+		{
+			"name": "Email Logs",
+			"item": [
+				{
+					"name": "List Email Logs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/email-logs/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"email-logs",
+								""
+							]
+						},
+						"description": "Get a list of all email logs for the user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Email Log",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/email-logs/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"email-logs",
+								"1",
+								""
+							]
+						},
+						"description": "Get a specific email log by ID"
+					},
+					"response": []
+				}
+			],
+			"description": "View email logs"
+		},
+		{
+			"name": "Send Email",
+			"item": [
+				{
+					"name": "Send Immediate Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"to_email\": \"recipient@example.com\",\n    \"subject\": \"Urgent Notification\",\n    \"body\": \"This is an important notification that needs to be sent immediately.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/send-email/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"send-email",
+								""
+							]
+						},
+						"description": "Send an immediate email (not scheduled)"
+					},
+					"response": []
+				}
+			],
+			"description": "Send immediate emails"
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Run Birthday Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks/birthday/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"birthday",
+								""
+							]
+						},
+						"description": "Manually trigger the birthday email task"
+					},
+					"response": []
+				},
+				{
+					"name": "Run Reminder Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks/reminder/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"reminder",
+								""
+							]
+						},
+						"description": "Manually trigger the reminder processing task"
+					},
+					"response": []
+				},
+				{
+					"name": "Cleanup Logs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/tasks/cleanup-logs/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"cleanup-logs",
+								""
+							]
+						},
+						"description": "Manually trigger the log cleanup task"
+					},
+					"response": []
+				}
+			],
+			"description": "Manually trigger Celery tasks"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"if (pm.response.code === 200 || pm.response.code === 201) {",
+					"    if (pm.response.json().access) {",
+					"        pm.environment.set(\"access_token\", pm.response.json().access);",
+					"    }",
+					"    if (pm.response.json().refresh) {",
+					"        pm.environment.set(\"refresh_token\", pm.response.json().refresh);",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}

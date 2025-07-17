@@ -6,3 +6,12 @@ redis
 django-environ
 drf-yasg
 whitenoise
+djangorestframework
+djangorestframework-simplejwt
+django-redis
+django-celery-beat
+django-cors-headers
+pytest
+pytest-django
+pytest-cov
+factory-boy

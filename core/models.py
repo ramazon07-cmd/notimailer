@@ -1,19 +1,48 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
-class User(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    birthdate = models.DateField()
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    birthdate = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
 
 class Reminder(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('sent', _('Sent')),
+        ('failed', _('Failed')),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders')
+    title = models.CharField(max_length=200)
     message = models.TextField()
-    send_at = models.DateTimeField()
-    sent = models.BooleanField(default=False)
+    scheduled_time = models.DateTimeField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    retry_count = models.PositiveSmallIntegerField(default=0)
+    last_retry = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
 
 class EmailLog(models.Model):
+    STATUS_CHOICES = (
+        ('success', _('Success')),
+        ('failed', _('Failed')),
+        ('retry', _('Retry')),
+    )
+    
+    reminder = models.ForeignKey(Reminder, on_delete=models.CASCADE, related_name='logs', null=True, blank=True)
     to_email = models.EmailField()
     subject = models.CharField(max_length=200)
     body = models.TextField()
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     sent_at = models.DateTimeField(auto_now_add=True)
+    error_message = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"Email to {self.to_email} - {self.status}"

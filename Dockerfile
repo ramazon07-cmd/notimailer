@@ -5,4 +5,4 @@ WORKDIR /app
 COPY . .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
-CMD ["gunicorn", "payment_project.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "notimailer.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notimailer - Email Reminder Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-top: 20px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f1f8ff;
+            font-weight: bold;
+        }
+        #loginSection, #registerSection, #dashboardSection, #createReminderSection {
+            display: none;
+        }
+        #welcomeSection {
+            display: block;
+        }
+        .stats-card {
+            text-align: center;
+            padding: 15px;
+        }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .stats-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .reminder-item {
+            border-left: 4px solid #0d6efd;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        .reminder-title {
+            font-weight: bold;
+        }
+        .reminder-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .email-log-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .success {
+            color: #198754;
+        }
+        .failed {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">📧 Notimailer</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="homeLink">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="dashboardLink">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="createReminderLink">Create Reminder</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex" id="authButtons">
+                        <button class="btn btn-outline-primary me-2" id="loginBtn">Login</button>
+                        <button class="btn btn-primary" id="registerBtn">Register</button>
+                    </div>
+                    <div class="d-flex" id="userInfo" style="display: none;">
+                        <span class="navbar-text me-3" id="userDisplay"></span>
+                        <button class="btn btn-outline-danger" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Welcome Section -->
+        <div id="welcomeSection" class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="mb-4">Welcome to Notimailer</h1>
+                        <p class="lead">Your personal email reminder service</p>
+                        <p>Never forget important events or tasks. Schedule email reminders and have them delivered to your inbox when you need them.</p>
+                        <div class="d-grid gap-2 col-6 mx-auto mt-4">
+                            <button class="btn btn-primary btn-lg" id="getStartedBtn">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Login</div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="loginUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="loginUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <div id="loginAlert" class="alert alert-danger" style="display: none;"></div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Register</div>
+                    <div class="card-body">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="registerUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="registerUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="registerEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerFirstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="registerFirstName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerLastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="registerLastName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerBirthdate" class="form-label">Birthdate</label>
+                                <input type="date" class="form-control" id="registerBirthdate">
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="registerPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword2" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="registerPassword2" required>
+                            </div>
+                            <div id="registerAlert" class="alert alert-danger" style="display: none;"></div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <h2 class="mb-4">Your Dashboard</h2>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="totalReminders">0</div>
+                        <div class="stats-label">Total Reminders</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="pendingReminders">0</div>
+                        <div class="stats-label">Pending</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="sentReminders">0</div>
+                        <div class="stats-label">Sent</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="failedReminders">0</div>
+                        <div class="stats-label">Failed</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Upcoming Reminders</div>
+                        <div class="card-body" id="upcomingRemindersList">
+                            <div class="text-center text-muted">No upcoming reminders</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Recent Email Logs</div>
+                        <div class="card-body" id="recentEmailLogs">
+                            <div class="text-center text-muted">No email logs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Reminder Section -->
+        <div id="createReminderSection" class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Create New Reminder</div>
+                    <div class="card-body">
+                        <form id="reminderForm">
+                            <div class="mb-3">
+                                <label for="reminderTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="reminderTitle" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="reminderMessage" class="form-label">Message</label>
+                                <textarea class="form-control" id="reminderMessage" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="reminderDate" class="form-label">Date and Time</label>
+                                <input type="datetime-local" class="form-control" id="reminderDate" required>
+                            </div>
+                            <div id="reminderAlert" class="alert alert-danger" style="display: none;"></div>
+                            <button type="submit" class="btn btn-primary">Schedule Reminder</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API URL base
+        const API_BASE_URL = '/api';
+        
+        // DOM elements
+        const sections = {
+            welcome: document.getElementById('welcomeSection'),
+            login: document.getElementById('loginSection'),
+            register: document.getElementById('registerSection'),
+            dashboard: document.getElementById('dashboardSection'),
+            createReminder: document.getElementById('createReminderSection')
+        };
+        
+        const authButtons = document.getElementById('authButtons');
+        const userInfo = document.getElementById('userInfo');
+        const userDisplay = document.getElementById('userDisplay');
+        
+        // Buttons and links
+        const homeLink = document.getElementById('homeLink');
+        const dashboardLink = document.getElementById('dashboardLink');
+        const createReminderLink = document.getElementById('createReminderLink');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Forms
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const reminderForm = document.getElementById('reminderForm');
+        
+        // Helper functions
+        function showSection(sectionName) {
+            Object.keys(sections).forEach(key => {
+                sections[key].style.display = key === sectionName ? 'block' : 'none';
+            });
+        }
+        
+        function isLoggedIn() {
+            return localStorage.getItem('access_token') !== null;
+        }
+        
+        function updateAuthDisplay() {
+            if (isLoggedIn()) {
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userDisplay.textContent = localStorage.getItem('username') || 'User';
+                dashboardLink.style.display = 'block';
+                createReminderLink.style.display = 'block';
+            } else {
+                authButtons.style.display = 'flex';
+                userInfo.style.display = 'none';
+                dashboardLink.style.display = 'none';
+                createReminderLink.style.display = 'none';
+            }
+        }
+        
+        function apiRequest(endpoint, method = 'GET', data = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (isLoggedIn()) {
+                headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+            }
+            
+            return fetch(`${API_BASE_URL}${endpoint}`, {
+                method,
+                headers,
+                body: data ? JSON.stringify(data) : null
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('username');
+                    updateAuthDisplay();
+                    showSection('login');
+                    throw new Error('Authentication required');
+                }
+                return response.json();
+            });
+        }
+        
+        function loadDashboard() {
+            if (!isLoggedIn()) {
+                showSection('login');
+                return;
+            }
+            
+            apiRequest('/dashboard/')
+                .then(data => {
+                    // Update stats
+                    document.getElementById('totalReminders').textContent = data.total_reminders;
+                    document.getElementById('pendingReminders').textContent = data.pending_reminders;
+                    document.getElementById('sentReminders').textContent = data.sent_reminders;
+                    document.getElementById('failedReminders').textContent = data.failed_reminders;
+                    
+                    // Update upcoming reminders
+                    const upcomingList = document.getElementById('upcomingRemindersList');
+                    upcomingList.innerHTML = '';
+                    
+                    if (data.upcoming_reminders.length === 0) {
+                        upcomingList.innerHTML = '<div class="text-center text-muted">No upcoming reminders</div>';
+                    } else {
+                        data.upcoming_reminders.forEach(reminder => {
+                            const date = new Date(reminder.scheduled_time);
+                            const formattedDate = date.toLocaleString();
+                            
+                            const div = document.createElement('div');
+                            div.className = 'reminder-item';
+                            div.innerHTML = `
+                                <div class="reminder-title">${reminder.title}</div>
+                                <div class="reminder-date">${formattedDate}</div>
+                                <div>${reminder.message}</div>
+                            `;
+                            upcomingList.appendChild(div);
+                        });
+                    }
+                    
+                    // Update email logs
+                    const logsContainer = document.getElementById('recentEmailLogs');
+                    logsContainer.innerHTML = '';
+                    
+                    if (data.recent_logs.length === 0) {
+                        logsContainer.innerHTML = '<div class="text-center text-muted">No email logs</div>';
+                    } else {
+                        data.recent_logs.forEach(log => {
+                            const date = new Date(log.sent_at);
+                            const formattedDate = date.toLocaleString();
+                            
+                            const div = document.createElement('div');
+                            div.className = 'email-log-item';
+                            div.innerHTML = `
+                                <div><strong>${log.subject}</strong></div>
+                                <div>To: ${log.to_email}</div>
+                                <div>
+                                    Status: <span class="${log.status}">${log.status}</span>
+                                </div>
+                                <div class="reminder-date">${formattedDate}</div>
+                            `;
+                            logsContainer.appendChild(div);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard:', error);
+                });
+            
+            showSection('dashboard');
+        }
+        
+        // Event Listeners
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('welcome');
+        });
+        
+        dashboardLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadDashboard();
+        });
+        
+        createReminderLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isLoggedIn()) {
+                showSection('createReminder');
+            } else {
+                showSection('login');
+            }
+        });
+        
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('login');
+        });
+        
+        registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('register');
+        });
+        
+        getStartedBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isLoggedIn()) {
+                loadDashboard();
+            } else {
+                showSection('register');
+            }
+        });
+        
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('username');
+            updateAuthDisplay();
+            showSection('welcome');
+        });
+        
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            fetch(`${API_BASE_URL}/auth/login/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.access) {
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    localStorage.setItem('username', username);
+                    updateAuthDisplay();
+                    loadDashboard();
+                    loginForm.reset();
+                } else {
+                    const alertBox = document.getElementById('loginAlert');
+                    alertBox.textContent = data.detail || 'Invalid credentials';
+                    alertBox.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                const alertBox = document.getElementById('loginAlert');
+                alertBox.textContent = 'An error occurred during login';
+                alertBox.style.display = 'block';
+            });
+        });
+        
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const firstName = document.getElementById('registerFirstName').value;
+            const lastName = document.getElementById('registerLastName').value;
+            const birthdate = document.getElementById('registerBirthdate').value;
+            const password = document.getElementById('registerPassword').value;
+            const password2 = document.getElementById('registerPassword2').value;
+            
+            if (password !== password2) {
+                const alertBox = document.getElementById('registerAlert');
+                alertBox.textContent = 'Passwords do not match';
+                alertBox.style.display = 'block';
+                return;
+            }
+            
+            const userData = {
+                username,
+                email,
+                first_name: firstName,
+                last_name: lastName,
+                password,
+                password2
+            };
+            
+            if (birthdate) {
+                userData.profile = { birthdate };
+            }
+            
+            fetch(`${API_BASE_URL}/auth/register/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    // Registration successful, now login
+                    fetch(`${API_BASE_URL}/auth/login/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        localStorage.setItem('access_token', data.access);
+                        localStorage.setItem('refresh_token', data.refresh);
+                        localStorage.setItem('username', username);
+                        updateAuthDisplay();
+                        loadDashboard();
+                        registerForm.reset();
+                    });
+                } else {
+                    const alertBox = document.getElementById('registerAlert');
+                    alertBox.textContent = Object.values(data).flat().join('\n');
+                    alertBox.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                const alertBox = document.getElementById('registerAlert');
+                alertBox.textContent = 'An error occurred during registration';
+                alertBox.style.display = 'block';
+            });
+        });
+        
+        reminderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!isLoggedIn()) {
+                showSection('login');
+                return;
+            }
+            
+            const title = document.getElementById('reminderTitle').value;
+            const message = document.getElementById('reminderMessage').value;
+            const scheduledTime = document.getElementById('reminderDate').value;
+            
+            apiRequest('/reminders/', 'POST', {
+                title,
+                message,
+                scheduled_time: scheduledTime
+            })
+            .then(data => {
+                reminderForm.reset();
+                loadDashboard();
+            })
+            .catch(error => {
+                console.error('Error creating reminder:', error);
+                const alertBox = document.getElementById('reminderAlert');
+                alertBox.textContent = 'Error creating reminder';
+                alertBox.style.display = 'block';
+            });
+        });
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAuthDisplay();
+            if (isLoggedIn()) {
+                loadDashboard();
+            } else {
+                showSection('welcome');
+            }
+        });
+    </script>
+</body>
+</html>
